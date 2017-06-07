@@ -165,7 +165,7 @@ std::list<token*> lex(const std::string &line) {
 	char quote_count;
 
 	while (iter != end) {
-		bool incr = true;
+		bool incr = false;
 		char ch = *iter;
 
 		switch (phase) {
@@ -173,7 +173,6 @@ std::list<token*> lex(const std::string &line) {
 			skip_whitespace(iter, end);
 			ch = *iter;
 			buffer = "";
-			incr = false;
 			if (is_word_initial(ch)) {
 				phase = phase_type::WORD;
 			}
@@ -197,9 +196,10 @@ std::list<token*> lex(const std::string &line) {
 
 		case phase_type::WORD:
 			if (is_word_medial(ch)) {
+				incr = true;
 				buffer += ch;
 			}
-			else if (std::isspace(ch)) {
+			else {
 				if (get_keyword_type(buffer) != keyword_type::BAD) {
 					tokens.push_back(new keyword_token(buffer, get_keyword_type(buffer)));
 				}
@@ -211,20 +211,17 @@ std::list<token*> lex(const std::string &line) {
 				}
 				phase = phase_type::DECIDE;
 			}
-			else {
-				std::cerr << "bad character" << std::endl;
-				abort();
-			}
 			break;
 
 		case phase_type::NUM:
 			if (is_num_medial(ch)) {
+				incr = true;
 				if (ch == '.') {
 					int_not_dbl = false;
 				}
 				buffer += ch;
 			}
-			else if (std::isspace(ch)) {
+			else {
 				if (int_not_dbl) {
 					try {
 						tokens.push_back(new int_token(buffer, std::stoi(buffer)));
@@ -245,13 +242,10 @@ std::list<token*> lex(const std::string &line) {
 				}
 				phase = phase_type::DECIDE;
 			}
-			else {
-				std::cerr << "bad character" << std::endl;
-				abort();
-			}
 			break;
 
 		case phase_type::STR:
+			incr = true;
 			// add escaping rules
 			if (ch == '"') {
 				if (++quote_count >= 2) {
@@ -266,15 +260,12 @@ std::list<token*> lex(const std::string &line) {
 
 		case phase_type::OP:
 			if (is_op_medial(ch)) {
+				incr = true;
 				buffer += ch;
 			}
-			else if (std::isspace(ch)) {
+			else {
 				tokens.push_back(new op_token(buffer, get_op_type(buffer)));
 				phase = phase_type::DECIDE;
-			}
-			else {
-				std::cerr << "bad character" << std::endl;
-				abort();
 			}
 			break;
 		}
