@@ -14,19 +14,18 @@
 int main() {
 #if !inputThroughConsole
     std::ifstream t("file.txt");
-    std::string line((std::istreambuf_iterator<char>(t)),
-                    std::istreambuf_iterator<char>());
+    std::stringstream input;
+    input << t.rdbuf();
 #else
     std::string line;
 #endif
-    std::stringstream input;
-    input << t.rdbuf();
     std::stringstream output;
 #if inputThroughConsole
 	while (std::getline(std::cin, line) && line != "quit") {
-#endif
 		auto tokens = lex(line);
-
+#else
+        auto tokens = lex(input.str());
+#endif
 		for (auto token : tokens) {
 			token->str(std::cout);
             token->str(output);
