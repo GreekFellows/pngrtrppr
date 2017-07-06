@@ -37,3 +37,29 @@ for i in (0, 10, 2) {
 ## problems
 
 *	are there better alternatives for the parse-as-expr symbol `:`?
+
+## grammar
+
+a piece of valid pngrtrppr code must meet the definition of `stmts`.
+
+*	`stmts`:
+	*	nothing
+	*	`stmt stmts`
+*	`stmt`:
+	*	`;`
+	*	`write <expr> ... ;`
+*	`expr`:
+	*	`factor`
+	*	`expr + factor`
+	*	`expr - factor`
+*	`factor`:
+	*	`term`
+	*	`factor * term`
+	*	`factor / term`
+	*	`factor % term`
+*	`term`:
+	*	`num`
+	*	`num unit`
+	*	`str`
+	*	`( expr )`
+	*	`( expr, expr )` which gives coords
