@@ -1,4 +1,4 @@
-# Issue 1
+# 1
 
 On syntax.
 
@@ -13,7 +13,7 @@ The ideal syntax should allow the user to do all of the followings with the lang
 
 ## Solution 1: strings and the `write` statement
 
-This solution requires the implementation of a string data type, which as literals can be represented by a sequence of characters enclosed by double quotes (`"`). Below are examples of valid strings:
+This solution requires the implementation of a string data type, which as literals can be repre sented by a sequence of characters enclosed by double quotes (`"`). Below are examples of valid strings:
 
 	"hello"
 	""
