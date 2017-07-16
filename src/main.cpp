@@ -1,43 +1,20 @@
+#include "pngr2.hpp"
 
-#include "pngr.hpp"
-
-#include <string>
-#include <fstream>
-#include <streambuf>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 
-
-//so that it is easier to switch between console and reading from text file
-#define inputThroughConsole false
-
-int main() {
-#if !inputThroughConsole
-    std::ifstream t("file.txt");
-    std::stringstream input;
-    input << t.rdbuf();
-#else
-    std::string line;
-#endif
-    std::stringstream output;
-#if inputThroughConsole
-	while (std::getline(std::cin, line) && line != "quit") {
-		auto tokens = lex(line);
-#else
-        auto tokens = lex(input.str());
-#endif
-		for (auto token : tokens) {
-			token->str(std::cout);
-            token->str(output);
-			delete token;
+int main(int argc, char** argv) {
+	for (int argi = 1; argi < argc; ++argi) {
+		std::ifstream reader(argv[argi]);
+		for (std::shared_ptr<token> tok = get_token(reader); tok != nullptr; tok = get_token(reader)) {
+			tok->str(std::cout);
 		}
-#if inputThroughConsole
-    }
-#endif
-    // output to file
-    std::ofstream o("output.txt");
-    o << output.rdbuf();
+	}
+
+	for (std::shared_ptr<token> tok = get_token(std::cin); tok != nullptr; tok = get_token(std::cin)) {
+		tok->str(std::cout);
+	}
+
+	return 0;
 }
-
-
-// note for compilation: gcc -std=c++11
