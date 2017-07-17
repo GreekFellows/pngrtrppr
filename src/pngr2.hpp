@@ -1,7 +1,9 @@
 #include <string>
 #include <memory>
-#include <sstream>
+#include <istream>
 #include <vector>
+
+// tokenizer
 
 enum class token_type {
 	BAD, KEYWORD, WORD, OP, INT, DBL, UNIT, STR
@@ -82,6 +84,8 @@ bool is_num_medial(const char&);
 bool is_op_initial(const char&);
 bool may_be_op(const std::string&);
 bool is_str_initial(const char&);
-void skip_whitespace(std::istringstream&);
+void skip_whitespace(std::istream&);
 
-std::shared_ptr<token> get_token(std::istringstream&);
+std::shared_ptr<token> get_token(std::istream&);
+
+// parser

@@ -181,7 +181,7 @@ inline bool is_str_initial(const char &ch) {
 	return ch == '"';
 }
 
-void skip_whitespace(std::istringstream &iss) {
+void skip_whitespace(std::istream &iss) {
 	while (iss && isspace(iss.peek())) {
 		iss.get();
 	}
@@ -191,7 +191,7 @@ enum class get_token_phase_type {
 	PEEK, WORD, NUM, OP, STR
 };
 
-std::shared_ptr<token> get_token(std::istringstream &iss) {
+std::shared_ptr<token> get_token(std::istream &iss) {
 	// skip whitespace prior to code
 	skip_whitespace(iss);
 
