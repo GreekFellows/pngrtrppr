@@ -14,8 +14,9 @@ enum class keyword_type {
 };
 
 enum class op_type {
-	BAD, ADD, SUB, MUL, DIV, MOD, ASSIGN, EQ,
+	BAD, ADD, SUB, MUL, DIV, MOD, ASSIGN,
 	ADDASSIGN, SUBASSIGN, MULASSIGN, DIVASSIGN, MODASSIGN,
+	EQ, LT, GT, LE, GE,
 	LBRACE, RBRACE, LPAREN, RPAREN, COMMA, SEMIC
 };
 
@@ -88,4 +89,4 @@ void skip_whitespace(std::istream&);
 
 std::shared_ptr<token> get_token(std::istream&);
 
-// parser
+// parsernhh

@@ -91,9 +91,6 @@ op_type get_op_type(const std::string &s) {
 	else if (s == "=") {
 		return op_type::ASSIGN;
 	}
-	else if (s == "==") {
-		return op_type::EQ;
-	}
 	else if (s == "+=") {
 		return op_type::ADDASSIGN;
 	}
@@ -108,6 +105,21 @@ op_type get_op_type(const std::string &s) {
 	}
 	else if (s == "%=") {
 		return op_type::MODASSIGN;
+	}
+	else if (s == "==") {
+		return op_type::EQ;
+	}
+	else if (s == "<") {
+		return op_type::LT;
+	}
+	else if (s == ">") {
+		return op_type::GT;
+	}
+	else if (s == "<=") {
+		return op_type::LE;
+	}
+	else if (s == ">=") {
+		return op_type::GE;
 	}
 	else if (s == "{") {
 		return op_type::LBRACE;
@@ -162,8 +174,9 @@ inline bool is_op_initial(const char &ch) {
 
 bool may_be_op(const std::string &s) {
 	static const std::vector<std::string> all_ops = {
-		"+", "-", "*", "/", "%", "=", "==",
+		"+", "-", "*", "/", "%", "=",
 		"+=", "-=", "*=", "/=", "%=",
+		"==", "<", ">", "<=", ">=",
 		"{", "}", "(", ")", ",", ";"
 	};
 
@@ -214,6 +227,10 @@ std::shared_ptr<token> get_token(std::istream &iss) {
 	}
 	else if (is_op_initial(ch)) {
 		phase = get_token_phase_type::OP;
+	}
+	else {
+		// we need a better error handling mechanism
+		return nullptr;
 	}
 
 	// read into token
