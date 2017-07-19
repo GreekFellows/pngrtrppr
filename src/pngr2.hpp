@@ -10,13 +10,15 @@ enum class token_type {
 };
 
 enum class keyword_type {
-	BAD, DEF, FOR, IN, IF, ELSE
+	BAD, DEF, FOR, IN, IF, ELSE, WHILE, TARGET, FROM, TO,
+	WRITE, WRITELN
 };
 
 enum class op_type {
 	BAD, ADD, SUB, MUL, DIV, MOD, ASSIGN,
 	ADDASSIGN, SUBASSIGN, MULASSIGN, DIVASSIGN, MODASSIGN,
 	EQ, LT, GT, LE, GE,
+	AND, OR, XOR, NOT,
 	LBRACE, RBRACE, LPAREN, RPAREN, COMMA, SEMIC
 };
 
@@ -89,4 +91,30 @@ void skip_whitespace(std::istream&);
 
 std::shared_ptr<token> get_token(std::istream&);
 
-// parsernhh
+// parser
+
+/*
+
+	syntax
+
+	deffile = target "path" from "line";
+
+	write expr1 expr2 ... to f;
+	for x in (0, 10, 2) {}
+	while (i == 8) {}
+
+	x = 0;
+	x = 0.8;
+	x = "dtom";
+	x = target "me" from "top to bottom";
+
+	x = int(0.8);
+
+	// much operator precedence hierarchy
+
+*/
+
+enum class value_type {
+	INT, DBL, STR, FILE
+};
+

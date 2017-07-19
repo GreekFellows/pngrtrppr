@@ -68,6 +68,24 @@ keyword_type get_keyword_type(const std::string &s) {
 	else if (s == "else") {
 		return keyword_type::ELSE;
 	}
+	else if (s == "while") {
+		return keyword_type::WHILE;
+	}
+	else if (s == "target") {
+		return keyword_type::TARGET;
+	}
+	else if (s == "from") {
+		return keyword_type::FROM;
+	}
+	else if (s == "to") {
+		return keyword_type::TO;
+	}
+	else if (s == "write") {
+		return keyword_type::WRITE;
+	}
+	else if (s == "writeln") {
+		return keyword_type::WRITELN;
+	}
 
 	return keyword_type::BAD;
 }
@@ -121,6 +139,18 @@ op_type get_op_type(const std::string &s) {
 	else if (s == ">=") {
 		return op_type::GE;
 	}
+	else if (s == "&&") {
+		return op_type::AND;
+	}
+	else if (s == "||") {
+		return op_type::OR;
+	}
+	else if (s == "^") {
+		return op_type::XOR;
+	}
+	else if (s == "!") {
+		return op_type::NOT;
+	}
 	else if (s == "{") {
 		return op_type::LBRACE;
 	}
@@ -168,7 +198,7 @@ inline bool is_num_medial(const char &ch) {
 }
 
 inline bool is_op_initial(const char &ch) {
-	static const std::string op_chs = "+-*/%=><{}(),;`";
+	static const std::string op_chs = "+-*/%=><{}(),;`!&|^";
 	return op_chs.find(ch) != std::string::npos;
 }
 
@@ -177,6 +207,7 @@ bool may_be_op(const std::string &s) {
 		"+", "-", "*", "/", "%", "=",
 		"+=", "-=", "*=", "/=", "%=",
 		"==", "<", ">", "<=", ">=",
+		"&&", "||", "^", "!",
 		"{", "}", "(", ")", ",", ";"
 	};
 
