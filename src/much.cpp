@@ -95,13 +95,10 @@ void file::where_to_start(std::string &tag) {
 }
 
 struct var {
-    std::string &name;
+    std::string name;
     var_type type;
-    var(std::string &v_name, var_type t, std::string &str);
-    var(std::string &v_name, var_type t, int i);
-    var(std::string &v_name, var_type t, bool b);
-    var(std::string &v_name, var_type t, double doub);
-    var(std::string &v_name, var_type t, std::shared_ptr<file> f);
+    var(std::string &v_name, var_type t);
+    ~var();
     union {
         std::string str_value;
         int int_value;
@@ -111,59 +108,43 @@ struct var {
     };
 };
 
-var::var(std::string &v_name, var_type t, std::string &str) :
-            name(v_name), type(t) {
-                str_value = str;
-            }
+var::var(std::string &v_name, var_type t) :
+            name(v_name), type(t) {}
 
-var::var(std::string &v_name, var_type t, int i) :
-            name(v_name), type(t), int_value(i) {}
-
-var::var(std::string &v_name, var_type t, bool b) :
-            name(v_name), type(t), bool_value(b) {}
-
-var::var(std::string &v_name, var_type t, double doub) :
-            name(v_name), type(t), dob_value(doub) {}
-
-var::var(std::string &v_name, var_type t, std::shared_ptr<file> f) :
-            name(v_name), type(t), f_value(f) {}
-
+var::~var() {} // seems to fix some problem by having this, I guess string doesn't
+               // delete otherwise
 
 std::shared_ptr<var> add(std::shared_ptr<var> var1, std::shared_ptr<var> var2)
 {
+    std::string name(" "); // just to occupy name though should change to union
+                           // of bool and name in future
     if(var1->type == var_type::INT && var2->type == var_type::INT) {
-        std::shared_ptr<var> new_int;
-        new_int->type = var_type::INT;
+        std::shared_ptr<var> new_int = std::make_shared<var>(name, var_type::INT);
         new_int->int_value = var1->int_value + var2->int_value;
         return new_int;
     }
     else if (var1->type == var_type::INT && var2->type == var_type::STR) {
-        std::shared_ptr<var> new_string;
-        new_string->type = var_type::STR;
+        std::shared_ptr<var> new_string = std::make_shared<var>(name, var_type::STR);
         new_string->str_value = std::to_string(var1->int_value) + var2->str_value;
         return new_string;
     }
     else if (var1->type == var_type::INT && var2->type == var_type::BOOL) {
-        std::shared_ptr<var> new_int;
-        new_int->type = var_type::INT;
+        std::shared_ptr<var> new_int = std::make_shared<var>(name, var_type::INT);
         new_int->int_value = var1->int_value + var2->bool_value;
         return new_int;
     }
     else if(var1->type == var_type::STR && var2->type == var_type::INT) {
-        std::shared_ptr<var> new_string;
-        new_string->type = var_type::STR;
+        std::shared_ptr<var> new_string = std::make_shared<var>(name, var_type::STR);
         new_string->str_value = var1->str_value + std::to_string(var2->int_value);
         return new_string;
     }
     else if (var1->type == var_type::STR && var2->type == var_type::STR) {
-        std::shared_ptr<var> new_string;
-        new_string->type = var_type::STR;
+        std::shared_ptr<var> new_string = std::make_shared<var>(name, var_type::STR);
         new_string->str_value = var1->str_value + var2->str_value;
         return new_string;
     }
     else if (var1->type == var_type::STR && var2->type == var_type::BOOL) {
-        std::shared_ptr<var> new_string;
-        new_string->type = var_type::STR;
+        std::shared_ptr<var> new_string = std::make_shared<var>(name, var_type::STR);
         if(var2->bool_value) {
             new_string->str_value = var1->str_value + "true";
         }
@@ -173,14 +154,12 @@ std::shared_ptr<var> add(std::shared_ptr<var> var1, std::shared_ptr<var> var2)
         return new_string;
     }
     else if(var1->type == var_type::BOOL && var2->type == var_type::INT) {
-        std::shared_ptr<var> new_int;
-        new_int->type = var_type::INT;
+        std::shared_ptr<var> new_int = std::make_shared<var>(name, var_type::INT);
         new_int->int_value = var1->bool_value + var2->int_value;
         return new_int;
     }
     else if (var1->type == var_type::BOOL && var2->type == var_type::STR) {
-        std::shared_ptr<var> new_string;
-        new_string->type = var_type::STR;
+        std::shared_ptr<var> new_string = std::make_shared<var>(name, var_type::STR);
         if(var2->bool_value) {
             new_string->str_value = "true" + var2->str_value;
         }
@@ -190,8 +169,7 @@ std::shared_ptr<var> add(std::shared_ptr<var> var1, std::shared_ptr<var> var2)
         return new_string;
     }
     else if (var1->type == var_type::BOOL && var2->type == var_type::BOOL) {
-        std::shared_ptr<var> new_bool;
-        new_bool->type = var_type::BOOL;
+        std::shared_ptr<var> new_bool = std::make_shared<var>(name, var_type::BOOL);
         new_bool->bool_value = var1->bool_value + var2->bool_value;
         return new_bool;
     }
@@ -207,7 +185,9 @@ std::unordered_map<std::string, reg_index_type> user_def_map;
 std::unordered_map<reg_index_type, std::shared_ptr<var>> tmp_reg;
 
 unsigned int next_index() {
+    // need to eventually look for open spaces
     next_id++;
+    std::cout << next_id;
     return next_id;
 }
 
@@ -233,7 +213,7 @@ struct expr_4 : public instr {
 	std::shared_ptr<expr_4> lhs;
     std::shared_ptr<expr_4> rhs;
 
-	reg_index_type execute() {
+	virtual reg_index_type execute() {
 		reg_index_type lhs_index = lhs->execute();
 
 		if (type == exec_type::ITSELF) {
@@ -248,7 +228,7 @@ struct expr_4 : public instr {
             std::shared_ptr<var> new_var = add(tmp_reg[lhs_index],tmp_reg[rhs_index]);
             // should add option to delete it here because technically used, but unknown
             // if not always temp
-			return make_tmp(new_var);
+            return make_tmp(new_var);
 		}
 		else if (type == exec_type::MINUS) {
 			// expr: factor - expr
@@ -267,7 +247,7 @@ struct expr_3 : public expr_4 {
         MULT, DIVID, ITSELF
     } type;
     
-    reg_index_type execute() {
+    virtual reg_index_type execute() {
         reg_index_type lhs_index = lhs->execute();
         if(type == factor_type::ITSELF){
             return lhs_index;
