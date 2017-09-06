@@ -25,7 +25,7 @@ Precedence	| Operator	| Description	| Association
 6	| `==`	| Equal to	| Left-to-right
 6	| `!=`	| Not equal to	| Left-to-right
 7	| `&&`	| Logical AND	| Left-to-right
-8	| `||`	| Logical OR	| Left-to-right
+8	| `\|\|`	| Logical OR	| Left-to-right
 9	| `=`	| Direct assignment	| Right-to-left
 9	| `+=`	| Compound assignment by sum	| Right-to-left
 9	| `-=`	| Compound assignment by difference	| Right-to-left
