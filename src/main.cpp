@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 	}
 
 	std::string s;
-	while (std::getline(std::cin, s) && s != "fuck") {
+	while (std::getline(std::cin, s) && s != "quit") {
 		std::istringstream iss(s);
 		std::cout << "# instrs: " << parse(iss).size() << std::endl;
 	}
