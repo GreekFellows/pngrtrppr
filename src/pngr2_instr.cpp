@@ -1,3 +1,5 @@
+
+
 // http://en.cppreference.com/w/cpp/language/operator_precedence
 
 /*
@@ -29,31 +31,13 @@
 // a + 4;
 
 // need to make something for string, int, bool, file
+
+#include "pngr2_instr.hpp"
 #include <fstream>
 #include <string>
 #include <unordered_map>
 #include <iostream>
 
-using reg_index_type = unsigned int;
-
-enum class var_type {
-    STR, INT, BOOL, DOUBLE, FILE
-};
-
-struct file {
-    std::fstream strm;
-    std::string f_name; // this is done so that a file can be opened and reopened so
-                        // that we can read and write rather than read previous
-    file(std::string &name);
-    file(std::string &name, std::string &wts_tag);
-    void close();
-    void open();
-    //~file();
-    void write(std::string &s); // write to file
-    void writeln(std::string &s);
-    void where_to_start(std::string &tag); // determine where to start by given tag
-};
-// ask Satoru if fine to open and close
 
 // open and close so that what is recently writen can be read.
 void file::close() {
@@ -114,41 +98,7 @@ void file::where_to_start(std::string &tag) {
     }
 }
 
-struct var {
-    //std::string name;
-    reg_index_type id;
-    var_type type;
-    var(reg_index_type index, var_type t);
-    var(reg_index_type index, var_type t, std::string &s);
-    var(reg_index_type index, var_type t, int i);
-    var(reg_index_type index, var_type t, bool b);
-    var(reg_index_type index, var_type t, double d);
-    ~var();
-    union {
-        std::string str_value;
-        int int_value;
-        bool bool_value;
-        double dob_value;
-        std::shared_ptr<file> f_value;
-    };
-};
 
-/*
- // for strings
- var::var(reg_index_type index, var_type t, std::string &s) {
- 
- }
- // for  ints
- var::var(reg_index_type index, var_type t, int i) {
- }
- var::var(reg_index_type index, var_type t, bool b) {
- }
- var::var(reg_index_type index, var_type t, double d) {
- }
- var::var(reg_index_type index, var_type t, std::string file_nam, std::string path_name) {
- }
- make_named_var
- */
 var::~var() {} // seems to fix some problem by having this, I guess string doesn't
                // delete otherwise
 
@@ -166,14 +116,8 @@ stmt
  
  
 */
-void assign(std::shared_ptr<var> var1, std::shared_ptr<var> var2) {
-    
-}
 
 static reg_index_type next_id = 0;
-
-std::unordered_map<std::string, reg_index_type> user_def_map;
-std::unordered_map<reg_index_type, std::shared_ptr<var>> tmp_reg;
 
 var::var(reg_index_type index, var_type t) :
     id(index), type(t) {}
@@ -194,19 +138,6 @@ var::var(reg_index_type index, var_type t, bool b) :
 var::var(reg_index_type index, var_type t, double d) :
     id(index), type(t), dob_value(d) {}
 
-reg_index_type make_var(var_type t) {
-    return 0;
-}
-reg_index_type make_named_var(var_type t) {
-    //throw errer if the
-    return 0;
-}
-//have functions for setting values of functions
-
-/*
- make_named_var
- */
-
 unsigned int next_index() {
     // need to eventually look for open spaces
     next_id++;
@@ -222,6 +153,45 @@ reg_index_type make_tmp(var_type t) {//std::shared_ptr<var> v) {
 	return new_index;
 }
 
+reg_index_type make_named_var(var_type t, std::string name) {
+    reg_index_type index = make_tmp(t);
+    user_def_map[name] = index;
+    return index;
+}
+
+// functions so that the way the variables are made does not matter
+void set_var_value(reg_index_type index, std::string val, var_type t) {
+    if(t == var_type::FILE) {
+        tmp_reg[index]->f_value->close();
+        tmp_reg[index]->f_value = std::make_shared<file>(val);
+    }
+    else {
+        tmp_reg[index]->str_value = val;
+    }
+}
+
+void set_var_value(reg_index_type index, int val) {
+    tmp_reg[index]->int_value = val;
+}
+
+void set_var_value(reg_index_type index, bool val) {
+    tmp_reg[index]->bool_value = val;
+}
+void set_var_value(reg_index_type index, double val) {
+    tmp_reg[index]->dob_value = val;
+}
+
+// so that it is easier to just use the functions for file without knowing implementation of
+// var
+void write_to_var_file(reg_index_type index, std::string str) {
+    tmp_reg[index]->f_value->write(str);
+}
+void writeln_to_var_file(reg_index_type index, std::string str) {
+    tmp_reg[index]->f_value->writeln(str);
+}
+void where_to_start_var_file(reg_index_type index, std::string tag) {
+    tmp_reg[index]->f_value->where_to_start(tag);
+}
 
 reg_index_type add(reg_index_type index1, reg_index_type index2)
 {
@@ -281,7 +251,15 @@ reg_index_type add(reg_index_type index1, reg_index_type index2)
         return index;
     }
     else {
+        // perhaps in the future could have stuff about if this is file or other that causes prob
         return -1; // error
+    }
+}
+
+reg_index_type assign(reg_index_type index1, reg_index_type index2) {
+    if(tmp_reg[index2]->type == var_type::STR) {
+        if()
+        tmp_reg[]
     }
 }
 

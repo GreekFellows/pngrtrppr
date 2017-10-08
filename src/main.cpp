@@ -1,5 +1,6 @@
-#include "pngr2_lex.hpp"
-#include "pngr2_parse.hpp"
+//#include "pngr2_lex.hpp"
+//#include "pngr2_parse.hpp"
+#include "pngr2_instr.cpp"
 
 #include <iostream>
 #include <fstream>
