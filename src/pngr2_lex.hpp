@@ -81,6 +81,8 @@ struct str_token : public token {
 	void str(std::ostream&);
 };
 
+using token_ptr = std::shared_ptr<token>;
+
 keyword_type get_keyword_type(const std::string&);
 op_type get_op_type(const std::string&);
 unit_type get_unit_type(const std::string&);
@@ -94,6 +96,6 @@ bool may_be_op(const std::string&);
 bool is_str_initial(const char&);
 void skip_whitespace(std::istream&);
 
-std::shared_ptr<token> get_token(std::istream&);
+token_ptr get_token(std::istream&);
 
 #endif

@@ -6,18 +6,17 @@
 #include <sstream>
 
 int main(int argc, char** argv) {
+	bytecode::runner_init();
+
 	for (int argi = 1; argi < argc; ++argi) {
 		std::ifstream reader(argv[argi]);
-		std::cout << "# instrs: " << parse(reader).size() << std::endl;
-		/*for (std::shared_ptr<token> tok = get_token(reader); tok != nullptr; tok = get_token(reader)) {
-			tok->str(std::cout);
-		}*/
+		bytecode::run(parser::parse(reader));
 	}
 
 	std::string s;
 	while (std::getline(std::cin, s) && s != "quit") {
 		std::istringstream iss(s);
-		std::cout << "# instrs: " << parse(iss).size() << std::endl;
+		bytecode::run(parser::parse(iss));
 	}
 
 	return 0;

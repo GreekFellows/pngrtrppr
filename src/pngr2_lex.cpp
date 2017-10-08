@@ -238,7 +238,7 @@ enum class get_token_phase_type {
 	PEEK, WORD, NUM, OP, STR
 };
 
-std::shared_ptr<token> get_token(std::istream &istrm) {
+token_ptr get_token(std::istream &istrm) {
 	// skip whitespace prior to code
 	skip_whitespace(istrm);
 
