@@ -16,6 +16,7 @@ Left-associativity result in left recursion, which can be eliminated by:
 *	[a simple trick](http://www.csd.uwo.ca/~moreno/CS447/Lectures/Syntax.html/node8.html); or
 *	using a right-associative rule but keep reading the same operator and operands to simulate left-associativity (terrible way to phrase this)
 
+
 # Big syntax
 
 	stmts:
@@ -28,6 +29,8 @@ Left-associativity result in left recursion, which can be eliminated by:
 		def id ( id ) = ??? ;
 		def id ( id , ... ) = ??? ;
 		expr_9 ;
+		if ( expr_9 ) { stmts } elif ( expr_9 ) { stmts } ... else { stmts }
+		for ( stmt expr_9 ; stmt ) { stmts }
 
 	expr_9:
 		id = expr_8
