@@ -1,5 +1,35 @@
 #include "pngr2_var.hpp"
 
+std::unordered_map<op_type, var::unary_func_t> var::unary_funcs = {
+};
+
+std::unordered_map<op_type, var::binary_func_t> var::binary_funcs = {
+	{ op_type::ADD, var::binary_add }
+};
+
+var::unary_func_ptr_t var::get_unary_func_ptr(const op_type &op) {
+	try {
+		return &unary_funcs.at(op);
+	}
+	catch (std::out_of_range) {}
+
+	return nullptr;
+}
+
+var::binary_func_ptr_t var::get_binary_func_ptr(const op_type &op) {
+	try {
+		return &binary_funcs.at(op);
+	}
+	catch (std::out_of_range) {}
+	
+	return nullptr;
+}
+
+var_ptr var::binary_add(const var_ptr &lhs, const var_ptr &rhs, bool sensible) {
+	return nullptr;
+	// stick dtom's adsds in here
+}
+
 var::var(const var_id_t &p_id, const var_t &p_type) : id(p_id), type(p_type) {}
 
 var_ptr var::make_int(const var_id_t &p_id, const int &p_val) {

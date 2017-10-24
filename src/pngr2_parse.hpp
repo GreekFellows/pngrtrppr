@@ -5,6 +5,7 @@
 
 #include "pngr2_lex.hpp"
 #include "pngr2_bytecode.hpp"
+#include "pngr2_console.hpp"
 
 #include <vector>
 
@@ -31,26 +32,16 @@ x = int(0.8);
 
 */
 
-// we use the bytecode implementation; there may also be a struct implementation
-using impl = bytecode;
-
 class parser {
 public:
+
 	using token_ptr = std::shared_ptr<token>;
 
 private:
-	struct parser_error {
-		enum error_type {
-			no, eof, err
-		} type;
-		std::string msg;
 
-		parser_error();
-		parser_error(const error_type &p_is_error, const std::string &p_msg);
-	};
-
-	static int get_int_from_token(const token_ptr &tok);
-	static double get_dbl_from_token(const token_ptr &tok);
+	static bool get_int_from_token(const token_ptr &tok, int &i);
+	static bool get_dbl_from_token(const token_ptr &tok, double &d);
+	static bool get_str_from_token(const token_ptr &tok, std::string &s);
 
 	static bool is_keyword_token(const token_ptr &tok, keyword_type = keyword_type::BAD);
 	static bool is_word_token(const token_ptr &tok);
@@ -58,6 +49,7 @@ private:
 	static bool is_num_token(const token_ptr &tok);
 	static bool is_int_token(const token_ptr &tok);
 	static bool is_dbl_token(const token_ptr &tok);
+	static bool is_str_token(const token_ptr &tok);
 	/*
 	bool parse_stmt(std::vector<instr_ptr>&, std::istream&, token_ptr&);
 	bool parse_add_expr(std::vector<instr_ptr>&, std::istream&, token_ptr&);
@@ -69,10 +61,11 @@ private:
 		where tok is the pointer holding the current token.
 	*/
 
-	static void parse_stmt(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, parser_error &err);
+	static bool parse_stmt(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err);
 
-	static void parse_expr_9(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, parser_error &err);
-	static void parse_expr_0(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, parser_error &err);
+	static bool parse_expr_9(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err);
+	static bool parse_expr_8(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err);
+	static bool parse_expr_0(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err);
 
 public:
 	static impl::ins_queue_t parse(std::istream &istrm);

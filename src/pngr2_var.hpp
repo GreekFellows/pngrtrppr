@@ -13,8 +13,11 @@
 #include <string>
 #include <memory>
 #include <variant>
+#include <unordered_map>
 
-using var_id_t = uint8_t;
+#include "pngr2_lex.hpp"
+
+using var_id_t = uint16_t;
 
 enum class var_t {
 	STR, INT, BOOL, DBL, FILE
@@ -22,10 +25,36 @@ enum class var_t {
 
 struct file {};
 
-struct var;
+class var;
 using var_ptr = std::shared_ptr<var>;
 
-struct var {
+class var {
+public:
+	using unary_func_t = var_ptr(*)(const var_ptr &lhs, bool sensible);
+	using binary_func_t = var_ptr(*)(const var_ptr &lhs, const var_ptr &rhs, bool sensible);
+
+	using unary_func_ptr_t = unary_func_t*;
+	using binary_func_ptr_t = binary_func_t*;
+
+private:
+	static std::unordered_map<op_type, unary_func_t> unary_funcs;
+
+	// unary functions
+	// static var_ptr sample_unary_func(const var_ptr &lhs, bool sensible);
+
+	static std::unordered_map<op_type, binary_func_t> binary_funcs;
+
+	// binary functions
+	// static var_ptr sample_binary_func(const var_ptr &lhs, const var_ptr &rhs, bool sensible);
+	static var_ptr binary_add(const var_ptr &lhs, const var_ptr &rhs, bool sensible);
+
+public:
+
+	static const var_id_t var_id_zero = 0;
+
+	static unary_func_ptr_t get_unary_func_ptr(const op_type &op);
+	static binary_func_ptr_t get_binary_func_ptr(const op_type &op);
+
 	var_id_t id;
 	var_t type;
 	std::variant<int, bool, double, std::string, std::shared_ptr<file>> field;

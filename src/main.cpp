@@ -1,22 +1,25 @@
 #include "pngr2_lex.hpp"
 #include "pngr2_parse.hpp"
+#include "pngr2_console.hpp"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 int main(int argc, char** argv) {
-	bytecode::runner_init();
+	impl::runner_init();
+
+	console::msg_welcome();
 
 	for (int argi = 1; argi < argc; ++argi) {
 		std::ifstream reader(argv[argi]);
-		bytecode::run(parser::parse(reader));
+		impl::run(parser::parse(reader));
 	}
 
 	std::string s;
-	while (std::getline(std::cin, s) && s != "quit") {
+	while (console::get_input(std::cin, s) && s != "quit") {
 		std::istringstream iss(s);
-		bytecode::run(parser::parse(iss));
+		impl::run(parser::parse(iss));
 	}
 
 	return 0;

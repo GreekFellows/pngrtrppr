@@ -19,7 +19,7 @@ enum class keyword_type {
 	WRITE, WRITELN
 };
 
-enum class op_type {
+enum class op_type : uint8_t {
 	BAD, ADD, SUB, MUL, DIV, MOD, ASSIGN,
 	ADDASSIGN, SUBASSIGN, MULASSIGN, DIVASSIGN, MODASSIGN,
 	EQ, INEQ, LT, GT, LE, GE,

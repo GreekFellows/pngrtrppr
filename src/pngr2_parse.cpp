@@ -2,33 +2,41 @@
 
 #include <iostream>
 
-parser::parser_error::parser_error(): parser_error(no, "") {
-
+bool parser::get_int_from_token(const token_ptr &tok, int &i) {
+	if (tok) {
+		i = std::dynamic_pointer_cast<int_token>(tok)->val;
+		return true;
+	}
+	return false;
 }
 
-parser::parser_error::parser_error(const error_type &p_type, const std::string &p_msg):
-	type(p_type), msg(p_msg) {
+bool parser::get_dbl_from_token(const token_ptr &tok, double &d) {
+	if (tok) {
+		d = std::dynamic_pointer_cast<dbl_token>(tok)->val;
+		return true;
+	}
+	return false;
 }
 
-int parser::get_int_from_token(const token_ptr &tok) {
-	return std::dynamic_pointer_cast<int_token>(tok)->val;
-}
-
-double parser::get_dbl_from_token(const token_ptr &tok) {
-	return std::dynamic_pointer_cast<dbl_token>(tok)->val;
+bool parser::get_str_from_token(const token_ptr &tok, std::string &s) {
+	if (tok) {
+		s = std::dynamic_pointer_cast<str_token>(tok)->val;
+		return true;
+	}
+	return false;
 }
 
 bool parser::is_keyword_token(const token_ptr &tok, keyword_type kw) {
-	return tok->type == token_type::KEYWORD &&
+	return tok && tok->type == token_type::KEYWORD &&
 		(kw == keyword_type::BAD || std::dynamic_pointer_cast<keyword_token>(tok)->kw == kw);
 }
 
 bool parser::is_word_token(const token_ptr &tok) {
-	return tok->type == token_type::WORD;
+	return tok && tok->type == token_type::WORD;
 }
 
 bool parser::is_op_token(const token_ptr &tok, op_type op) {
-	return tok->type == token_type::OP &&
+	return tok && tok->type == token_type::OP &&
 		(op == op_type::BAD || std::dynamic_pointer_cast<op_token>(tok)->op == op);
 }
 
@@ -37,11 +45,15 @@ bool parser::is_num_token(const token_ptr &tok) {
 }
 
 bool parser::is_int_token(const token_ptr &tok) {
-	return tok->type == token_type::INT;
+	return tok && tok->type == token_type::INT;
 }
 
 bool parser::is_dbl_token(const token_ptr &tok) {
-	return tok->type == token_type::DBL;
+	return tok && tok->type == token_type::DBL;
+}
+
+bool parser::is_str_token(const token_ptr &tok) {
+	return tok && tok->type == token_type::STR;
 }
 /*
 	stmt:
@@ -136,47 +148,125 @@ std::vector<instr_ptr> parse(std::istream &istrm) {
 }
 */
 
-void parser::parse_stmt(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, parser_error &err) {
+bool parser::parse_stmt(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err) {
 	if (tok == nullptr) {	//	end-of-file
-		err.type = parser::parser_error::eof;
-		err.msg = "end of code";
-		return;
+		err = console::syntax_error(true, "");	// empty error msg = eof
+		return true;
 	}
 	else if (is_op_token(tok, op_type::SEMIC)) {	//	empty statement
 		tok = get_token(istrm);
-		return;
+		return true;
 	}
 	else {	//	expr;
-		// parse_add_expr(instrs, istrm, tok);
-		parse_expr_9(ins_queue, istrm, tok, err);
-		if (is_op_token(tok, op_type::SEMIC)) {
-			tok = get_token(istrm);
-			return;
+		if (parse_expr_9(ins_queue, istrm, tok, err)) {
+			if (is_op_token(tok, op_type::SEMIC)) {
+				tok = get_token(istrm);
+				return true;
+			}
+			else {
+				err = console::syntax_error(true, "expected a semicolon");
+				return false;
+			}
 		}
 		else {
-			err.type = parser::parser_error::eof;
-			err.msg = "expected semicolon";
+			return false;
 		}
 	}
 }
 
-void parser::parse_expr_9(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, parser_error &err) {
-	parse_expr_0(ins_queue, istrm, tok, err);
+bool parser::parse_expr_9(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err) {
+	if (parse_expr_8(ins_queue, istrm, tok, err)) {
+		if (is_op_token(tok, op_type::ASSIGN) ||
+			is_op_token(tok, op_type::ADDASSIGN) ||
+			is_op_token(tok, op_type::SUBASSIGN) ||
+			is_op_token(tok, op_type::MULASSIGN) ||
+			is_op_token(tok, op_type::DIVASSIGN) ||
+			is_op_token(tok, op_type::MODASSIGN)
+			) {
+			tok = get_token(istrm);
+			if (parse_expr_9(ins_queue, istrm, tok, err)) {
+				impl::add_ins_binop(ins_queue, get_op_type(tok->lexeme));
+				return true;
+			}
+
+			err = console::syntax_error(true, "expected an expression");
+			return false;
+		}
+
+		return true;
+	}
+
+	err = console::syntax_error(true, "expected an expression");
+	return false;
 }
 
-void parser::parse_expr_0(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, parser_error &err) {
+bool parser::parse_expr_8(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err) {
+	return parse_expr_0(ins_queue, istrm, tok, err);
+}
+
+bool parser::parse_expr_0(impl::ins_queue_t &ins_queue, std::istream &istrm, token_ptr &tok, console::syntax_error &err) {
 	if (is_int_token(tok)) {
-		impl::add_ins_int_lit(ins_queue, get_int_from_token(tok));
-		token_ptr tok = get_token(istrm);
+		int i;
+		if (get_int_from_token(tok, i)) {
+			impl::add_ins_int_lit(ins_queue, i);
+			tok = get_token(istrm);
+			return true;
+		}
+
+		err = console::syntax_error(true, "could not get value of int_token");
+		return false;
+	}
+	else if (is_dbl_token(tok)) {
+		double d;
+		if (get_dbl_from_token(tok, d)) {
+			impl::add_ins_dbl_lit(ins_queue, d);
+			tok = get_token(istrm);
+			return true;
+		}
+
+		err = console::syntax_error(true, "could not get value of dbl_token");
+		return false;
+	}
+	else if (is_str_token(tok)) {
+		std::string s;
+		if (get_str_from_token(tok, s)) {
+			impl::add_ins_str_lit(ins_queue, s);
+			tok = get_token(istrm);
+			return true;
+		}
+
+		err = console::syntax_error(true, "could not get value of str_token");
+		return false;
 	}
 	else if (is_word_token(tok)) {
+		if (tok->lexeme == "true" || tok->lexeme == "false") {
+			impl::add_ins_bool_lit(ins_queue, tok->lexeme == "true");
+			tok = get_token(istrm);
+			return true;
+		}
+
 		impl::add_ins_acc(ins_queue, tok->lexeme);
-		token_ptr tok = get_token(istrm);
+		tok = get_token(istrm);
+		return true;
 	}
-	else {
-		err.type = parser::parser_error::err;
-		err.msg = "expected literal or alphanumeric string";
+	else if (is_op_token(tok, op_type::LPAREN)) {
+		tok = get_token(istrm);
+		if (parse_expr_9(ins_queue, istrm, tok, err)) {
+			if (is_op_token(tok, op_type::RPAREN)) {
+				tok = get_token(istrm);
+				return true;
+			}
+
+			err = console::syntax_error(true, "expected a rightparen");
+			return false;
+		}
+
+		err = console::syntax_error(true, "expected an expression");
+		return false;
 	}
+
+	err = console::syntax_error(true, "expected a literal or alphanumeric string");
+	return false;
 }
 
 impl::ins_queue_t parser::parse(std::istream &istrm) {
@@ -184,14 +274,17 @@ impl::ins_queue_t parser::parse(std::istream &istrm) {
 
 	impl::ins_queue_t ins_queue = impl::ins_queue_new();
 	token_ptr tok = get_token(istrm);
-	parser_error err;
+	console::syntax_error err;
 
-	while (err.type == parser_error::no) {
+	while (!err.is_error) {
 		parse_stmt(ins_queue, istrm, tok, err);
 	}
 
-	if (err.type != parser_error::no) {
-		// give error
+	if (err.msg != "") {
+		console::msg_syntax_error(err);
+	}
+	else {
+		console::msg_parsing_done();
 	}
 
 	return ins_queue;
